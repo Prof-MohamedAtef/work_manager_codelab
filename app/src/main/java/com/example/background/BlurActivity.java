@@ -19,8 +19,13 @@ package com.example.background;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -53,6 +58,10 @@ public class BlurActivity extends AppCompatActivity {
         mOutputButton = findViewById(R.id.see_file_button);
         mCancelButton = findViewById(R.id.cancel_button);
 
+
+        // Hookup the Cancel button
+        mCancelButton.setOnClickListener(view -> mViewModel.cancelWork());
+
         // Image uri should be stored in the ViewModel; put it there then display
         Intent intent = getIntent();
         String imageUriExtra = intent.getStringExtra(Constants.KEY_IMAGE_URI);
@@ -61,8 +70,44 @@ public class BlurActivity extends AppCompatActivity {
             Glide.with(this).load(mViewModel.getImageUri()).into(mImageView);
         }
 
+        mOutputButton.setOnClickListener(view -> {
+            Uri currentUri = mViewModel.getOutputUri();
+            if (currentUri != null) {
+                Intent actionView = new Intent(Intent.ACTION_VIEW, currentUri);
+                if (actionView.resolveActivity(getPackageManager()) != null) {
+                    startActivity(actionView);
+                }
+            }
+        });
+
         // Setup blur image file button
         mGoButton.setOnClickListener(view -> mViewModel.applyBlur(getBlurLevel()));
+
+        mViewModel.getOutputWorkInfo().observe(this, listOfWorkInfos->{
+            if (listOfWorkInfos==null||listOfWorkInfos.isEmpty()){
+                return;
+            }
+
+            // We only care about the first output status.
+            // Every continuation has only one worker tagged TAG_OUTPUT
+            WorkInfo workInfo = listOfWorkInfos.get(0);
+
+            boolean finished = workInfo.getState().isFinished();
+            if (!finished){
+                showWorkInProgress();
+            }else {
+                showWorkFinished();
+                Data outputData = workInfo.getOutputData();
+
+                String outputImageUri = outputData.getString(Constants.KEY_IMAGE_URI);
+
+                // If there is an output file show "See File" button
+                if (!TextUtils.isEmpty(outputImageUri)) {
+                    mViewModel.setOutputUri(outputImageUri);
+                    mOutputButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
     /**

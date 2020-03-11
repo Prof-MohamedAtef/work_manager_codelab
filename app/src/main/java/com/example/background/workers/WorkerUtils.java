@@ -149,7 +149,7 @@ final class WorkerUtils {
             @NonNull Context applicationContext,
             @NonNull Bitmap bitmap) throws FileNotFoundException {
 
-        String name = String.format("blur-filter-output-%s.png", UUID.randomUUID().toString());
+        String name = String.format("blur-filter-workmanager.png", UUID.randomUUID().toString());
         File outputDir = new File(applicationContext.getFilesDir(), Constants.OUTPUT_PATH);
         if (!outputDir.exists()) {
             outputDir.mkdirs(); // should succeed
