@@ -36,7 +36,7 @@ public class SaveImageToFileWorker extends Worker {
     public Result doWork() {
         Context applicationContext = getApplicationContext();
 
-        WorkerUtils.makeStatusNotification("Doing <WORK_NAME>", applicationContext);
+        WorkerUtils.makeStatusNotification("Saving Image", applicationContext);
         WorkerUtils.sleep();
 
         ContentResolver resolver = applicationContext.getContentResolver();

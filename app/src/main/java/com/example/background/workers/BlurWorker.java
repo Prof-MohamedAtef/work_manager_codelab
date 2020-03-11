@@ -31,7 +31,7 @@ public class BlurWorker extends Worker {
     @Override
     public Result doWork() {
         mContext=getApplicationContext();
-        WorkerUtils.makeStatusNotification("Doing <WORK_NAME>", mContext);
+        WorkerUtils.makeStatusNotification("Blurring image", mContext);
         WorkerUtils.sleep();
 
         String resourceUri = getInputData().getString(Constants.KEY_IMAGE_URI);
